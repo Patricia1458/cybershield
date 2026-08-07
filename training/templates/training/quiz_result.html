@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="cs-card text-center">
+    <h2>Quiz Complete</h2>
+    <p style="font-size: 1.75rem; font-weight: 800; color: var(--cs-primary);">{{ score }} / {{ total }} correct</p>
+    <p class="text-small" style="color: var(--cs-text-muted);">Score: {{ percentage }}%</p>
+
+    {% if passed %}
+        <p style="color: var(--cs-success);">Great job! You have a strong grasp of this topic and earned a certificate for this module.</p>
+    {% else %}
+        <p style="color: var(--cs-danger);">Consider reviewing this module again — this topic needs more attention.</p>
+    {% endif %}
+
+    {% if next_module %}
+        <p class="mt-3 mb-0">
+            <a href="{% url 'module_detail' next_module.id %}" class="btn-cs btn-cs-primary">Next Module: {{ next_module.title }} &rarr;</a>
+        </p>
+    {% else %}
+        <p class="mt-3 mb-0" style="color: var(--cs-success); font-weight: 600;">You've completed all training modules!</p>
+    {% endif %}
+
+    <div class="quick-actions" style="justify-content: center;">
+        <a href="{% url 'module_list' %}" class="btn-cs btn-cs-outline mt-3">Back to Modules</a>
+        {% if passed %}
+            <a href="{% url 'my_certificates' %}" class="btn-cs btn-cs-outline mt-3">View My Certificates</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

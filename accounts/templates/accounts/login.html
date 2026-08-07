@@ -1,0 +1,53 @@
+{% extends 'base_auth.html' %}
+{% block title %}Sign In — CyberShield{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-brand">
+            <h1>CyberShield</h1>
+            <div class="tagline">Think Before You Click.</div>
+            <p>Build stronger cybersecurity habits through practical training and realistic simulations.</p>
+        </div>
+        <div class="auth-form-panel">
+            <h2>Sign In</h2>
+            <p class="auth-sub">Enter your credentials to continue.</p>
+            <form method="post" id="loginForm">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label" for="id_username">Email</label>
+                    {{ form.username }}
+                    {% for error in form.username.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="id_password">Password</label>
+                    {{ form.password }}
+                    {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </div>
+                <div class="mb-3 d-flex align-items-center justify-content-between">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
+                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                    </div>
+                    <a href="{% url 'password_reset' %}" class="text-small">Forgot password?</a>
+                </div>
+                {% for error in form.non_field_errors %}
+                    <div class="alert-cs alert-error">{{ error }}</div>
+                {% endfor %}
+                <button type="submit" class="btn-cs btn-cs-primary w-100" id="loginBtn">Sign In</button>
+            </form>
+            <p class="text-center mt-2 text-small">
+                Don't have an account? <a href="{% url 'register' %}"><strong>Register your business</strong></a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById('loginForm').addEventListener('submit', function() {
+    const btn = document.getElementById('loginBtn');
+    btn.textContent = 'Signing in...';
+    btn.disabled = true;
+});
+</script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Progress</h1>
+    <p class="subtitle">Track your cybersecurity learning journey.</p>
+</div>
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-label">Security Score</div>
+        <div class="kpi-value">{{ security_score }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Training Complete</div>
+        <div class="kpi-value">{{ completion_rate }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Avg Quiz Score</div>
+        <div class="kpi-value">{{ avg_quiz_score }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Phishing Detection</div>
+        <div class="kpi-value">{{ detection_rate }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Simulations Done</div>
+        <div class="kpi-value">{{ total_results }}</div>
+    </div>
+</div>
+
+<div class="cs-card mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <h3 class="mb-0">Security Score Over Time</h3>
+        {% if has_snapshots %}
+            <span class="badge-cs {% if growth >= 0 %}badge-success{% else %}badge-neutral{% endif %}">
+                {% if growth >= 0 %}+{% endif %}{{ growth }}% total growth
+            </span>
+        {% endif %}
+    </div>
+    {% if has_snapshots %}
+        <div class="chart-container">
+            <canvas id="securityScoreChart"></canvas>
+        </div>
+    {% else %}
+        <p class="text-small" style="color: var(--cs-text-muted);">Not enough history yet — complete a few more quizzes to start seeing your trend.</p>
+    {% endif %}
+</div>
+
+<div class="grid-2">
+    <div class="cs-card">
+        <h3 class="mb-3">Performance by Category</h3>
+        {% if categories %}
+            {% for c in categories %}
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span class="text-small" style="font-weight:600;">
+                            {{ c.label }}
+                            {% if c == weakest_category %}<span class="badge-cs badge-neutral" style="margin-left:0.4rem;">Weakest</span>{% endif %}
+                        </span>
+                        <span class="text-small" style="color: var(--cs-text-muted);">{{ c.avg_score }}%</span>
+                    </div>
+                    <div class="progress-cs">
+                        <div class="progress-cs-fill" style="width: {{ c.avg_score }}%;"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">Complete a training module to see your category breakdown.</p>
+        {% endif %}
+    </div>
+
+    <div class="cs-card">
+        <h3 class="mb-3">Recommended</h3>
+        {% if weakest_category %}
+            <div class="info-card">
+                <p style="margin: 0 0 0.75rem;">
+                    Improve your {{ weakest_category.label }} score — currently your lowest area at {{ weakest_category.avg_score }}%.
+                </p>
+                {% if weakest_module %}
+                    <a href="{% url 'module_detail' weakest_module.id %}" class="btn-cs btn-cs-primary btn-cs-sm">Review {{ weakest_module.title }}</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">Complete a training module to get a personalized recommendation.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="cs-card mt-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="mb-0">Your Achievements</h3>
+        <span class="text-small" style="color: var(--cs-text-muted); font-weight: 600;">{{ earned_count }} of 5 unlocked</span>
+    </div>
+    <div class="badge-row">
+        {% for badge in badges %}
+        <div class="badge-item {% if badge.earned %}earned{% else %}locked{% endif %}">
+            <div class="badge-icon">{% if badge.earned %}&#10003;{% else %}&#128274;{% endif %}</div>
+            <div class="badge-label">{{ badge.label }}</div>
+            <div class="badge-status">{% if badge.earned %}Earned{% else %}Locked{% endif %}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{{ chart_data|json_script:"progress-chart-data" }}
+{% endblock %}
+
+{% block extra_js %}
+{% if has_snapshots %}
+<script>
+(function() {
+    var data = JSON.parse(document.getElementById('progress-chart-data').textContent);
+    var ctx = document.getElementById('securityScoreChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Security Score',
+                data: data.scores,
+                borderColor: '#235347',
+                backgroundColor: 'rgba(35, 83, 71, 0.12)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#235347',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, max: 100 } }
+        }
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

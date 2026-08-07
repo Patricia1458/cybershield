@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h1>Training Modules</h1>
+        <p class="subtitle">Bite-sized lessons to help your team recognise real threats.</p>
+    </div>
+    {% if is_admin %}
+        <a href="{% url 'create_module' %}" class="btn-cs btn-cs-primary">+ Create New Module</a>
+    {% endif %}
+</div>
+
+{% if modules %}
+<div class="grid-3">
+{% for module in modules %}
+    <div class="training-card">
+        <span class="badge-cs badge-info mb-2">{{ module.get_category_display }}</span>
+        <h3>{{ module.title }}</h3>
+        <p class="card-meta">{{ module.description }}</p>
+        <a href="{% url 'module_detail' module.id %}" class="btn-cs btn-cs-primary mt-auto">View Module</a>
+    </div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty-state cs-card">
+    <h3>No training modules yet</h3>
+    <p>Create your first module to get started.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,14 @@
+<svg viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg">
+<rect x="200" y="30" width="180" height="270" rx="24" fill="#0B2B26" stroke="#163832" stroke-width="1"/>
+<rect x="212" y="50" width="156" height="230" rx="12" fill="#DAF1DE"/>
+<text x="222" y="72" font-family="sans-serif" font-size="12" fill="#0B2B26">Unknown Number</text>
+<rect x="217" y="88" width="146" height="100" rx="14" fill="#ffffff" stroke="#8EB69B" stroke-width="1"/>
+<text x="227" y="112" font-family="sans-serif" font-size="12" fill="#051F20">TechStart Payroll: Your</text>
+<text x="227" y="130" font-family="sans-serif" font-size="12" fill="#051F20">direct deposit failed.</text>
+<text x="227" y="148" font-family="sans-serif" font-size="12" fill="#051F20">Update within 2 hrs:</text>
+<text x="227" y="168" font-family="sans-serif" font-size="12" fill="#378ADD" text-decoration="underline">bit.ly/payroll-fix</text>
+<text x="217" y="205" font-family="sans-serif" font-size="11" fill="#235347">6:34 PM</text>
+<circle cx="380" cy="72" r="3" fill="#D85A30"/><line x1="383" y1="72" x2="440" y2="72" stroke="#D85A30" stroke-dasharray="3,3"/><text x="448" y="76" font-family="sans-serif" font-size="12" fill="#4A1B0C">Unknown/spoofed number</text>
+<circle cx="360" cy="148" r="3" fill="#D85A30"/><line x1="363" y1="148" x2="440" y2="148" stroke="#D85A30" stroke-dasharray="3,3"/><text x="448" y="152" font-family="sans-serif" font-size="12" fill="#4A1B0C">Urgent time pressure</text>
+<circle cx="330" cy="168" r="3" fill="#D85A30"/><line x1="333" y1="168" x2="440" y2="190" stroke="#D85A30" stroke-dasharray="3,3"/><text x="448" y="194" font-family="sans-serif" font-size="12" fill="#4A1B0C">Shortened suspicious link</text>
+</svg>

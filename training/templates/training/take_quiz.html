@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="cs-card">
+    <h2>{{ module.title }} — Quiz</h2>
+    <p class="text-small" id="quizProgress" style="color: var(--cs-text-muted);">Question 1 of {{ questions|length }}</p>
+
+    <form method="post" id="quizForm">
+        {% csrf_token %}
+        {% for question in questions %}
+            <div class="quiz-question mb-4" data-question-index="{{ forloop.counter0 }}" {% if not forloop.first %}style="display: none;"{% endif %}>
+                <p style="font-weight: 600;">{{ forloop.counter }}. {{ question.question_text }}</p>
+
+                <div class="quiz-option">
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="a" required>
+                        {{ question.option_a }}
+                    </label>
+                </div>
+                <div class="quiz-option">
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="b">
+                        {{ question.option_b }}
+                    </label>
+                </div>
+                <div class="quiz-option">
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="c">
+                        {{ question.option_c }}
+                    </label>
+                </div>
+                <div class="quiz-option">
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="d">
+                        {{ question.option_d }}
+                    </label>
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="quick-actions" style="margin-bottom: 0;">
+            <button type="button" id="quizNextBtn" class="btn-cs btn-cs-primary">Next</button>
+            <button type="submit" id="quizSubmitBtn" class="btn-cs btn-cs-primary" style="display: none;">Submit Quiz</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var questions = document.querySelectorAll('.quiz-question');
+    var total = questions.length;
+    var current = 0;
+    var progressLabel = document.getElementById('quizProgress');
+    var nextBtn = document.getElementById('quizNextBtn');
+    var submitBtn = document.getElementById('quizSubmitBtn');
+
+    function showQuestion(index) {
+        questions.forEach(function(q, i) {
+            q.style.display = (i === index) ? 'block' : 'none';
+        });
+        progressLabel.textContent = 'Question ' + (index + 1) + ' of ' + total;
+        var isLast = index === total - 1;
+        nextBtn.style.display = isLast ? 'none' : 'inline-flex';
+        submitBtn.style.display = isLast ? 'inline-flex' : 'none';
+    }
+
+    nextBtn.addEventListener('click', function() {
+        if (current < total - 1) {
+            current += 1;
+            showQuestion(current);
+        }
+    });
+
+    if (total > 0) {
+        showQuestion(current);
+    }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+<svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg">
+<rect x="60" y="40" width="380" height="240" rx="10" fill="#ffffff" stroke="#8EB69B" stroke-width="1"/>
+<text x="80" y="68" font-family="sans-serif" font-size="14" font-weight="600" fill="#051F20">From: security@paypa1-support.com</text>
+<line x1="80" y1="84" x2="420" y2="84" stroke="#DAF1DE" stroke-width="1"/>
+<text x="80" y="108" font-family="sans-serif" font-size="14" font-weight="600" fill="#051F20">Subject: URGENT: Verify Your Account Now</text>
+<line x1="80" y1="126" x2="420" y2="126" stroke="#DAF1DE" stroke-width="1"/>
+<text x="80" y="160" font-family="sans-serif" font-size="14" fill="#0B2B26">Dear Customer,</text>
+<text x="80" y="185" font-family="sans-serif" font-size="14" fill="#0B2B26">Your account will be suspended unless</text>
+<text x="80" y="205" font-family="sans-serif" font-size="14" fill="#0B2B26">you verify your details immediately.</text>
+<text x="80" y="235" font-family="sans-serif" font-size="14" fill="#378ADD" text-decoration="underline">Verify Account &#8594;</text>
+<circle cx="440" cy="68" r="3" fill="#D85A30"/><line x1="443" y1="68" x2="468" y2="68" stroke="#D85A30" stroke-dasharray="3,3"/><text x="476" y="72" font-family="sans-serif" font-size="12" fill="#4A1B0C">Mismatched sender domain</text>
+<circle cx="440" cy="108" r="3" fill="#D85A30"/><line x1="443" y1="108" x2="468" y2="108" stroke="#D85A30" stroke-dasharray="3,3"/><text x="476" y="112" font-family="sans-serif" font-size="12" fill="#4A1B0C">Creates false urgency</text>
+<circle cx="440" cy="160" r="3" fill="#D85A30"/><line x1="443" y1="160" x2="468" y2="160" stroke="#D85A30" stroke-dasharray="3,3"/><text x="476" y="164" font-family="sans-serif" font-size="12" fill="#4A1B0C">Generic greeting</text>
+<circle cx="440" cy="235" r="3" fill="#D85A30"/><line x1="443" y1="235" x2="468" y2="235" stroke="#D85A30" stroke-dasharray="3,3"/><text x="476" y="239" font-family="sans-serif" font-size="12" fill="#4A1B0C">Link goes to fake site</text>
+</svg>

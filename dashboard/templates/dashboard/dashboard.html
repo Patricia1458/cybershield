@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h1>My Dashboard</h1>
+        <p class="subtitle">
+            {% if is_admin %}Organization-wide training and phishing awareness stats.{% else %}Your training progress and phishing awareness stats.{% endif %}
+        </p>
+    </div>
+    {% if not is_admin %}
+        <a href="{% url 'my_analytics' %}" class="btn-cs btn-cs-outline">View My Analytics</a>
+    {% endif %}
+</div>
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-label">Training Completion</div>
+        <div class="kpi-value">{{ completion_rate }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Average Quiz Score</div>
+        <div class="kpi-value">{{ avg_quiz_score }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Phishing Click Rate</div>
+        <div class="kpi-value">{{ click_rate }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Phishing Report Rate</div>
+        <div class="kpi-value">{{ report_rate }}%</div>
+    </div>
+</div>
+
+{% if is_admin %}
+    <div class="cs-card">
+        <h3>Want the full breakdown?</h3>
+        <p class="text-small" style="color: var(--cs-text-muted);">See per-campaign click/report rates and the employee interaction heatmap.</p>
+        <div class="quick-actions" style="margin-bottom: 0;">
+            <a href="{% url 'campaign_list' %}" class="btn-cs btn-cs-primary">Phishing Campaigns</a>
+            <a href="{% url 'phishing_analytics' %}" class="btn-cs btn-cs-outline">Analytics</a>
+        </div>
+    </div>
+{% else %}
+    <div class="cs-card">
+        <h3>Training Progress</h3>
+        {% if progress %}
+            <table class="cs-table">
+                <thead>
+                    <tr><th>Module</th><th>Completed</th><th>Score</th></tr>
+                </thead>
+                <tbody>
+                {% for p in progress %}
+                    <tr>
+                        <td>{{ p.module.title }}</td>
+                        <td>
+                            {% if p.completed %}
+                                <span class="badge-cs badge-success">Yes</span>
+                            {% else %}
+                                <span class="badge-cs badge-neutral">No</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ p.score }}%</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">No training completed yet.</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

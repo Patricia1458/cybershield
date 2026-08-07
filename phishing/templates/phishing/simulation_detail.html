@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<a href="{% url 'my_simulations' %}" class="text-small">&lt; Back to My Simulations</a>
+
+<div class="page-header mt-2">
+    <h1>{{ result.campaign.name }}</h1>
+</div>
+
+{% with template=result.campaign.template %}
+{% if template.channel == 'sms' %}
+    <div class="phone-frame mb-3">
+        <div style="padding-top: 0.6rem;">
+            <div class="phone-frame-notch"></div>
+        </div>
+        <div class="phone-frame-header">Simulated Text Message &mdash; Training Purpose Only</div>
+        <div class="phone-frame-body">
+            <div class="sms-sender-label">{{ template.sender_name }}</div>
+            <div class="sms-bubble">{{ body_html|linebreaksbr }}</div>
+            <div class="sms-timestamp">{{ result.email_sent_at|date:"g:i A" }}</div>
+        </div>
+        <div class="phone-frame-actions">
+            {% if result.reported_suspicious %}
+                <span class="badge-cs badge-success" style="text-align: center;">You reported this</span>
+            {% elif result.clicked_link %}
+                <span class="badge-cs badge-danger" style="text-align: center;">You clicked this link</span>
+            {% else %}
+                <form method="post" action="{% url 'report_suspicious' result.tracking_token %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-cs btn-cs-primary" style="width: 100%;">Report Phishing</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+{% elif template.channel == 'voice' %}
+    <div class="voicemail-card mb-3">
+        <div class="voicemail-header">
+            <div class="voicemail-label">Voicemail Transcript &mdash; Training Purpose Only</div>
+            <h3 style="color: #fff; margin: 0;">{{ template.sender_name }}</h3>
+        </div>
+        <div class="voicemail-meta">
+            <div>
+                <span class="label">Caller ID</span>
+                {{ template.sender_name }}
+            </div>
+            <div>
+                <span class="label">Duration</span>
+                {{ voicemail_duration }}
+            </div>
+            <div>
+                <span class="label">Date</span>
+                {{ result.email_sent_at|date:"M j, Y g:i A" }}
+            </div>
+        </div>
+        <div class="voicemail-transcript">
+            {{ body_html|linebreaks }}
+        </div>
+        <div class="voicemail-actions">
+            {% if result.reported_suspicious %}
+                <span class="badge-cs badge-success">You reported this</span>
+            {% elif result.clicked_link %}
+                <span class="badge-cs badge-danger">You clicked this link</span>
+            {% else %}
+                <form method="post" action="{% url 'report_suspicious' result.tracking_token %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-cs btn-cs-primary">Report Phishing</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+{% else %}
+    <div class="simulated-email-window mb-3">
+        <div class="browser-chrome">
+            <div class="browser-chrome-dots">
+                <span class="browser-chrome-dot"></span>
+                <span class="browser-chrome-dot"></span>
+                <span class="browser-chrome-dot"></span>
+            </div>
+            <span class="browser-chrome-label">Simulated Email &mdash; Training Purpose Only</span>
+        </div>
+        <div class="email-client" style="border: none; border-radius: 0; box-shadow: none;">
+            <div class="email-header">
+                <div class="email-header-row"><span class="label">From:</span> {{ template.sender_name }} &lt;{{ template.sender_email }}&gt;</div>
+                <div class="email-header-row"><span class="label">Subject:</span> {{ template.subject_line }}</div>
+                <div class="email-header-row"><span class="label">Date:</span> {{ result.email_sent_at|date:"M j, Y g:i A" }}</div>
+            </div>
+            <div class="email-body">
+                {{ body_html|linebreaks }}
+            </div>
+            <div class="email-actions">
+                {% if result.reported_suspicious %}
+                    <span class="badge-cs badge-success">You reported this</span>
+                {% elif result.clicked_link %}
+                    <span class="badge-cs badge-danger">You clicked this link</span>
+                {% else %}
+                    <form method="post" action="{% url 'report_suspicious' result.tracking_token %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-cs btn-cs-primary">Report Phishing</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endwith %}
+
+{% if result.clicked_link or result.reported_suspicious %}
+    {% if next_result %}
+        <a href="{% url 'simulation_detail' next_result.tracking_token %}" class="btn-cs btn-cs-primary">Next Simulation &rarr;</a>
+    {% else %}
+        <p style="color: var(--cs-success); font-weight: 600;">You've reviewed all your simulations!</p>
+        <a href="{% url 'my_simulations' %}" class="btn-cs btn-cs-outline">Back to My Simulations</a>
+    {% endif %}
+{% endif %}
+{% endblock %}

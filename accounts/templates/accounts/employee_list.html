@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h1>Employees</h1>
+        <p class="subtitle">{{ total_count }} member{{ total_count|pluralize }} &middot; {{ organization.name }}</p>
+        {% if action_filter == 'clicked' %}
+            <span class="badge-cs badge-danger mt-2">Showing employees who clicked a simulated phishing link</span>
+        {% elif action_filter == 'reported' %}
+            <span class="badge-cs badge-success mt-2">Showing employees who reported a simulated phishing email</span>
+        {% elif sort_filter == 'completion_asc' %}
+            <span class="badge-cs badge-neutral mt-2">Sorted by training completion, lowest first</span>
+        {% elif sort_filter == 'quiz_asc' %}
+            <span class="badge-cs badge-neutral mt-2">Sorted by average quiz score, lowest first</span>
+        {% endif %}
+    </div>
+    <a href="{% url 'invite_employee' %}" class="btn-cs btn-cs-primary">+ Invite Employee</a>
+</div>
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-label">Total</div>
+        <div class="kpi-value">{{ total_count }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Active</div>
+        <div class="kpi-value">{{ active_count }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Pending/Invited</div>
+        <div class="kpi-value">{{ pending_count }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">High Risk</div>
+        <div class="kpi-value">{{ high_risk_count }}</div>
+    </div>
+</div>
+
+<form method="get" class="filter-bar">
+    <input type="text" name="q" class="form-control" placeholder="Search by name or email" value="{{ search }}">
+    <select name="status" class="form-select">
+        <option value="">All Statuses</option>
+        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="invited" {% if status_filter == 'invited' %}selected{% endif %}>Invited</option>
+    </select>
+    <select name="risk" class="form-select">
+        <option value="">All Risk Levels</option>
+        <option value="low" {% if risk_filter == 'low' %}selected{% endif %}>Low</option>
+        <option value="medium" {% if risk_filter == 'medium' %}selected{% endif %}>Medium</option>
+        <option value="high" {% if risk_filter == 'high' %}selected{% endif %}>High</option>
+    </select>
+    {% if action_filter %}<input type="hidden" name="action" value="{{ action_filter }}">{% endif %}
+    {% if sort_filter %}<input type="hidden" name="sort" value="{{ sort_filter }}">{% endif %}
+    <button type="submit" class="btn-cs btn-cs-outline">Filter</button>
+    {% if search or status_filter or risk_filter or action_filter or sort_filter %}
+        <a href="{% url 'employee_list' %}" class="btn-cs btn-cs-outline">Clear</a>
+    {% endif %}
+</form>
+
+{% if rows %}
+<div class="cs-card">
+    <div class="table-scroll">
+    <table class="cs-table">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Status</th>
+                <th>Training</th>
+                <th>Quiz Score</th>
+                <th>Click Rate</th>
+                <th>Risk</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in rows %}
+            <tr>
+                <td>
+                    <div class="employee-cell">
+                        <div class="avatar avatar-sm">
+                            {% if row.profile.user.first_name %}{{ row.profile.user.first_name|first|upper }}{{ row.profile.user.last_name|first|upper }}{% else %}{{ row.profile.user.username|slice:":2"|upper }}{% endif %}
+                        </div>
+                        <div>
+                            <div class="employee-name">{% if row.profile.user.first_name %}{{ row.profile.user.first_name }} {{ row.profile.user.last_name }}{% else %}{{ row.profile.user.username }}{% endif %}</div>
+                            <div class="employee-email">{{ row.profile.encrypted_email }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    {% if row.profile.status == 'active' %}
+                        <span class="badge-cs badge-success">Active</span>
+                    {% else %}
+                        <span class="badge-cs badge-outline">{{ row.profile.get_status_display }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="table-progress">
+                        <div class="progress-cs"><div class="progress-cs-fill" style="width: {{ row.completion_rate }}%;"></div></div>
+                        <span class="progress-cs-value">{{ row.completion_rate }}%</span>
+                    </div>
+                </td>
+                <td>{{ row.avg_quiz_score }}%</td>
+                <td>{{ row.click_rate }}%</td>
+                <td>
+                    {% if row.risk == 'low' %}
+                        <span class="badge-cs badge-success">Low</span>
+                    {% elif row.risk == 'medium' %}
+                        <span class="badge-cs badge-warning">Medium</span>
+                    {% else %}
+                        <span class="badge-cs badge-danger">High</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="quick-actions" style="margin-bottom: 0;">
+                        <a href="{% url 'employee_detail' row.profile.user_id %}" class="btn-cs btn-cs-outline btn-cs-sm">View</a>
+                        <a href="{% url 'assign_training' row.profile.user_id %}" class="btn-cs btn-cs-outline btn-cs-sm">Assign</a>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state cs-card">
+    <h3>No employees match your filters</h3>
+    <p>Try clearing the search or filters, or invite your first employee to get started.</p>
+    <a href="{% url 'invite_employee' %}" class="btn-cs btn-cs-primary mt-3">Invite Employee</a>
+</div>
+{% endif %}
+{% endblock %}

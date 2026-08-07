@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="cs-card">
+    <h2>{{ campaign.name }}</h2>
+    <p class="text-small" style="color: var(--cs-text-muted);">
+        Status: <span class="badge-cs badge-info">{{ campaign.status|title }}</span>
+        &nbsp;&middot;&nbsp; Template used: {{ campaign.template.name }}
+    </p>
+
+    <h4 class="mt-4">Results</h4>
+    <table class="cs-table">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Clicked</th>
+                <th>Reported</th>
+                <th>Simulated Phishing Link</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in results_with_links %}
+            <tr>
+                <td>{{ item.result.employee.username }}</td>
+                <td>
+                    {% if item.result.clicked_link %}
+                        <span class="badge-cs badge-danger">Yes</span>
+                    {% else %}
+                        <span class="badge-cs badge-neutral">No</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.result.reported_suspicious %}
+                        <span class="badge-cs badge-success">Yes</span>
+                    {% else %}
+                        <span class="badge-cs badge-neutral">No</span>
+                    {% endif %}
+                </td>
+                <td><a href="{{ item.link }}" target="_blank">Open link</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'campaign_list' %}" class="btn-cs btn-cs-primary mt-3">Back to Campaigns</a>
+</div>
+{% endblock %}

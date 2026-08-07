@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load cybershield_extras %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% time_greeting %}, {{ user.first_name|default:user.username }}</h1>
+    <p class="subtitle">Here's your organization's security overview for today.</p>
+</div>
+
+<div class="kpi-grid">
+    <a href="{% url 'employee_list' %}" class="kpi-card kpi-card-clickable">
+        <div class="kpi-label">Total Employees</div>
+        <div class="kpi-value">{{ total_employees }}</div>
+    </a>
+    <a href="{% url 'employee_list' %}?sort=completion_asc" class="kpi-card kpi-card-clickable">
+        <div class="kpi-label">Training Completion</div>
+        <div class="kpi-value">{{ completion_rate }}%</div>
+    </a>
+    <a href="{% url 'employee_list' %}?action=clicked" class="kpi-card kpi-card-clickable">
+        <div class="kpi-label">Phishing Click Rate</div>
+        <div class="kpi-value">{{ click_rate }}%</div>
+    </a>
+    <a href="{% url 'employee_list' %}?action=reported" class="kpi-card kpi-card-clickable">
+        <div class="kpi-label">Report Rate</div>
+        <div class="kpi-value">{{ report_rate }}%</div>
+    </a>
+    <a href="{% url 'employee_list' %}?sort=quiz_asc" class="kpi-card kpi-card-clickable">
+        <div class="kpi-label">Avg Quiz Score</div>
+        <div class="kpi-value">{{ avg_quiz_score }}%</div>
+    </a>
+    <a href="{% url 'employee_list' %}?risk=high" class="kpi-card kpi-card-clickable">
+        <div class="kpi-label">At Risk</div>
+        <div class="kpi-value">{{ at_risk_count }}</div>
+    </a>
+</div>
+
+<div class="grid-2">
+    <div class="cs-card">
+        <h3 class="mb-3">Organization Training Progress</h3>
+        {% if has_progress_chart %}
+            <div class="chart-container" style="height: 220px;">
+                <canvas id="orgProgressChart"></canvas>
+            </div>
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">Not enough security-score history yet to chart a trend.</p>
+        {% endif %}
+    </div>
+
+    <div class="cs-card">
+        <h3 class="mb-3">Phishing Performance</h3>
+        {% if has_phishing_data %}
+            <div class="chart-container" style="height: 220px;">
+                <canvas id="phishingPerformanceChart"></canvas>
+            </div>
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">No phishing simulation results yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="cs-card mt-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="mb-0">Employees Requiring Attention</h3>
+        <a href="{% url 'employee_list' %}" class="btn-cs btn-cs-outline btn-cs-sm">View All</a>
+    </div>
+    {% if attention_rows %}
+        <table class="cs-table">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Training</th>
+                    <th>Quiz Score</th>
+                    <th>Click Rate</th>
+                    <th>Risk</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for row in attention_rows %}
+                <tr>
+                    <td>
+                        <div class="employee-cell">
+                            <div class="avatar avatar-sm">
+                                {% if row.profile.user.first_name %}{{ row.profile.user.first_name|first|upper }}{{ row.profile.user.last_name|first|upper }}{% else %}{{ row.profile.user.username|slice:":2"|upper }}{% endif %}
+                            </div>
+                            <div>
+                                <div class="employee-name">{% if row.profile.user.first_name %}{{ row.profile.user.first_name }} {{ row.profile.user.last_name }}{% else %}{{ row.profile.user.username }}{% endif %}</div>
+                                <div class="employee-email">{{ row.profile.encrypted_email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ row.completion_rate }}%</td>
+                    <td>{{ row.avg_quiz_score }}%</td>
+                    <td>{{ row.click_rate }}%</td>
+                    <td>
+                        {% if row.risk == 'high' %}
+                            <span class="badge-cs badge-danger">High</span>
+                        {% elif row.risk == 'medium' %}
+                            <span class="badge-cs badge-warning">Medium</span>
+                        {% else %}
+                            <span class="badge-cs badge-success">Low</span>
+                        {% endif %}
+                    </td>
+                    <td><a href="{% url 'employee_detail' row.profile.user_id %}" class="tab-btn-link">View</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-small" style="color: var(--cs-text-muted);">No employees yet.</p>
+    {% endif %}
+</div>
+
+<div class="cs-card mt-4">
+    <h3 class="mb-3">Recent Activity</h3>
+    {% if recent_activity %}
+        {% for log in recent_activity %}
+            <div class="activity-item">
+                <div class="activity-dot"></div>
+                <div>
+                    <div>{{ log.action }}</div>
+                    <div class="activity-time">{{ log.created_at|timesince }} ago</div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-small" style="color: var(--cs-text-muted);">No activity recorded yet.</p>
+    {% endif %}
+</div>
+
+{{ progress_chart|json_script:"org-progress-data" }}
+{{ phishing_chart|json_script:"phishing-performance-data" }}
+{% endblock %}
+
+{% block extra_js %}
+{% if has_progress_chart %}
+<script>
+(function() {
+    var data = JSON.parse(document.getElementById('org-progress-data').textContent);
+    var ctx = document.getElementById('orgProgressChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Avg Security Score',
+                data: data.scores,
+                borderColor: '#235347',
+                backgroundColor: 'rgba(35, 83, 71, 0.12)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#235347',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, max: 100 } }
+        }
+    });
+})();
+</script>
+{% endif %}
+{% if has_phishing_data %}
+<script>
+(function() {
+    var data = JSON.parse(document.getElementById('phishing-performance-data').textContent);
+    var ctx = document.getElementById('phishingPerformanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                data: data.values,
+                backgroundColor: ['#8EB69B', '#163832', '#DAF1DE', 'rgba(11,43,38,0.12)'],
+                borderColor: ['#8EB69B', '#163832', '#8EB69B', 'rgba(11,43,38,0.3)'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+            // "Clicked" (index 1) and "Reported" (index 2) drill down to the
+            // employee list filtered to that group; the other bars aren't clickable.
+            onClick: function(evt, elements) {
+                if (!elements.length) { return; }
+                var index = elements[0].index;
+                var employeeListUrl = '{% url "employee_list" %}';
+                if (index === 1) {
+                    window.location.href = employeeListUrl + '?action=clicked';
+                } else if (index === 2) {
+                    window.location.href = employeeListUrl + '?action=reported';
+                }
+            },
+            onHover: function(evt, elements) {
+                var isClickable = elements.length > 0 && (elements[0].index === 1 || elements[0].index === 2);
+                evt.native.target.style.cursor = isClickable ? 'pointer' : 'default';
+            }
+        }
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

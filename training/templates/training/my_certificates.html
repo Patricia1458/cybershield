@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Certificates</h1>
+    <p class="subtitle">Certificates earned by passing a training module's quiz.</p>
+</div>
+
+{% if certificates %}
+<div class="grid-3">
+    {% for certificate in certificates %}
+        <div class="training-card">
+            <h3>{{ certificate.module.title }}</h3>
+            <p class="card-meta">Issued {{ certificate.issued_at|date:"M j, Y" }}</p>
+            <div class="quick-actions" style="margin-bottom: 0;">
+                <a href="{% url 'certificate_detail' certificate.id %}" class="btn-cs btn-cs-outline btn-cs-sm">View</a>
+                <a href="{% url 'certificate_pdf' certificate.id %}" class="btn-cs btn-cs-primary btn-cs-sm">Download PDF</a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state cs-card">
+    <h3>No certificates yet</h3>
+    <p>Pass a training module's quiz to earn your first certificate.</p>
+    <a href="{% url 'module_list' %}" class="btn-cs btn-cs-primary mt-3">Browse Training</a>
+</div>
+{% endif %}
+{% endblock %}

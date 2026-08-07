@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Create Training Module</h1>
+    <p class="subtitle">Build a lesson and its 5-question quiz in one step.</p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="cs-card mb-3">
+        <h3>Module Details</h3>
+        <div class="form-group mb-3">
+            <label class="form-label" for="id_title">Title</label>
+            <input type="text" class="form-control" id="id_title" name="title" required>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" for="id_category">Category</label>
+            <select class="form-select" id="id_category" name="category">
+                {% for value, label in categories %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" for="id_description">Description</label>
+            <textarea class="form-control" id="id_description" name="description" rows="2" required></textarea>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" for="id_content">Lesson Content</label>
+            <textarea class="form-control" id="id_content" name="content" rows="5"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="id_scenario">Scenario</label>
+            <textarea class="form-control" id="id_scenario" name="scenario" rows="3" required></textarea>
+        </div>
+    </div>
+
+    {% for n in "12345" %}
+    <div class="cs-card mb-3">
+        <h3>Question {{ n }}</h3>
+        <div class="form-group mb-3">
+            <label class="form-label" for="id_q{{ n }}_text">Question Text</label>
+            <input type="text" class="form-control" id="id_q{{ n }}_text" name="q{{ n }}_text" {% if n == "1" %}required{% endif %}>
+        </div>
+        <div class="grid-2 mb-3">
+            <div class="form-group">
+                <label class="form-label" for="id_q{{ n }}_a">Option A</label>
+                <input type="text" class="form-control" id="id_q{{ n }}_a" name="q{{ n }}_a">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_q{{ n }}_b">Option B</label>
+                <input type="text" class="form-control" id="id_q{{ n }}_b" name="q{{ n }}_b">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_q{{ n }}_c">Option C</label>
+                <input type="text" class="form-control" id="id_q{{ n }}_c" name="q{{ n }}_c">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_q{{ n }}_d">Option D</label>
+                <input type="text" class="form-control" id="id_q{{ n }}_d" name="q{{ n }}_d">
+            </div>
+        </div>
+        <div class="form-group" style="max-width:200px;">
+            <label class="form-label" for="id_q{{ n }}_correct">Correct Answer</label>
+            <select class="form-select" id="id_q{{ n }}_correct" name="q{{ n }}_correct">
+                <option value="a">A</option>
+                <option value="b">B</option>
+                <option value="c">C</option>
+                <option value="d">D</option>
+            </select>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="quick-actions">
+        <button type="submit" class="btn-cs btn-cs-primary">Create Module</button>
+        <a href="{% url 'module_list' %}" class="btn-cs btn-cs-outline">Cancel</a>
+    </div>
+</form>
+{% endblock %}

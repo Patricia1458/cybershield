@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<a href="{% url 'employee_list' %}" class="text-small">&lt; Back to Employees</a>
+
+<div class="page-header d-flex align-items-center justify-content-between mt-2">
+    <div class="d-flex align-items-center gap-3">
+        <div class="avatar avatar-square" style="width: 56px; height: 56px; font-size: 1.3rem; background: var(--color-darkest); color: var(--color-lightest);">
+            {% if employee.first_name %}{{ employee.first_name|first|upper }}{{ employee.last_name|first|upper }}{% else %}{{ employee.username|slice:":2"|upper }}{% endif %}
+        </div>
+        <div>
+            <h1 class="mb-0">{% if employee.first_name %}{{ employee.first_name }} {{ employee.last_name }}{% else %}{{ employee.username }}{% endif %}</h1>
+            <p class="subtitle mb-0">
+                {{ profile.encrypted_email }}
+                {% if profile.status == 'active' %}
+                    <span class="badge-cs badge-success" style="margin-left: 0.5rem;">Active</span>
+                {% else %}
+                    <span class="badge-cs badge-outline" style="margin-left: 0.5rem;">{{ profile.get_status_display }}</span>
+                {% endif %}
+                <span style="margin-left: 0.5rem;">&middot; Joined {{ profile.date_joined|date:"M j, Y" }}</span>
+            </p>
+        </div>
+    </div>
+    <a href="{% url 'assign_training' employee.id %}" class="btn-cs btn-cs-primary">Assign Training</a>
+</div>
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-label">Training Progress</div>
+        <div class="kpi-value">{{ metrics.completion_rate }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Quiz Score</div>
+        <div class="kpi-value">{{ metrics.avg_quiz_score }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Phishing Click Rate</div>
+        <div class="kpi-value">{{ metrics.click_rate }}%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Risk Level</div>
+        <div class="kpi-value">
+            {% if metrics.risk == 'low' %}
+                <span class="badge-cs badge-success">Low</span>
+            {% elif metrics.risk == 'medium' %}
+                <span class="badge-cs badge-warning">Medium</span>
+            {% else %}
+                <span class="badge-cs badge-danger">High</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if metrics.risk == 'high' %}
+<div class="warning-card mb-4">
+    <strong>Retraining Recommended</strong>
+    <p class="mb-0 mt-1">
+        {% if employee.first_name %}{{ employee.first_name }}{% else %}{{ employee.username }}{% endif %}
+        has a high phishing click rate ({{ metrics.click_rate }}%) and {{ metrics.completion_rate }}% training completion.
+        Consider assigning additional training modules.
+    </p>
+</div>
+{% endif %}
+
+<div class="grid-2">
+    <div class="cs-card">
+        <h3>Assigned Training Modules</h3>
+        {% if assigned_modules %}
+            {% for m in assigned_modules %}
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span class="text-small" style="font-weight: 600;">{{ m.module.title }}</span>
+                        {% if m.completed %}
+                            <span class="badge-cs badge-success">{{ m.progress_percent }}%</span>
+                        {% else %}
+                            <span class="badge-cs badge-neutral">Not started</span>
+                        {% endif %}
+                    </div>
+                    <div class="progress-cs">
+                        <div class="progress-cs-fill" style="width: {{ m.progress_percent }}%;"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">No modules assigned yet.</p>
+        {% endif %}
+        <a href="{% url 'assign_training' employee.id %}" class="btn-cs btn-cs-outline btn-cs-sm mt-2">Assign Training</a>
+    </div>
+
+    <div class="cs-card">
+        <h3>Phishing Simulation History</h3>
+        {% if results %}
+            {% for r in results %}
+                <div class="member-row">
+                    <div>
+                        <div class="employee-name">{{ r.campaign.name }}</div>
+                        <div class="text-small" style="color: var(--cs-text-muted);">{{ r.email_sent_at|date:"M j, Y" }}</div>
+                    </div>
+                    {% if r.reported_suspicious %}
+                        <span class="badge-cs badge-success">Reported</span>
+                    {% elif r.clicked_link %}
+                        <span class="badge-cs badge-danger">Clicked Link</span>
+                    {% else %}
+                        <span class="badge-cs badge-neutral">No Action</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">No simulated phishing emails sent yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+<svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg">
+<rect x="60" y="40" width="380" height="220" rx="10" fill="#ffffff" stroke="#8EB69B" stroke-width="1"/>
+<text x="80" y="68" font-family="sans-serif" font-size="14" font-weight="600" fill="#051F20">Caller ID: Unknown</text>
+<line x1="80" y1="84" x2="420" y2="84" stroke="#DAF1DE" stroke-width="1"/>
+<text x="80" y="108" font-family="sans-serif" font-size="14" fill="#0B2B26">Duration: 0:42</text>
+<line x1="80" y1="126" x2="420" y2="126" stroke="#DAF1DE" stroke-width="1"/>
+<text x="80" y="155" font-family="sans-serif" font-size="14" fill="#0B2B26">"This is Sarah from IT Support.</text>
+<text x="80" y="175" font-family="sans-serif" font-size="14" fill="#0B2B26">Your account shows suspicious</text>
+<text x="80" y="195" font-family="sans-serif" font-size="14" fill="#0B2B26">activity. Please call back and</text>
+<text x="80" y="215" font-family="sans-serif" font-size="14" fill="#0B2B26">confirm your PIN to secure it."</text>
+<circle cx="440" cy="68" r="3" fill="#D85A30"/><line x1="443" y1="68" x2="468" y2="68" stroke="#D85A30" stroke-dasharray="3,3"/><text x="476" y="72" font-family="sans-serif" font-size="12" fill="#4A1B0C">Caller ID can be spoofed</text>
+<circle cx="440" cy="175" r="3" fill="#D85A30"/><line x1="443" y1="175" x2="468" y2="175" stroke="#D85A30" stroke-dasharray="3,3"/><text x="476" y="179" font-family="sans-serif" font-size="12" fill="#4A1B0C">Creates urgency and fear</text>
+<circle cx="440" cy="215" r="3" fill="#D85A30"/><line x1="443" y1="215" x2="468" y2="215" stroke="#D85A30" stroke-dasharray="3,3"/><text x="476" y="219" font-family="sans-serif" font-size="12" fill="#4A1B0C">Requests PIN over phone</text>
+</svg>

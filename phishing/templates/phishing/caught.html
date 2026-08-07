@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="cs-card">
+    <h2>This Was a Simulated Phishing Test</h2>
+    <p>You just clicked a link from a simulated phishing email as part of your organization's security awareness training.</p>
+    <p>In a real attack, this link could have led to credential theft, malware installation, or data compromise.</p>
+
+    <div class="warning-card">
+        <h4>What to look out for next time:</h4>
+        <ul class="mb-0">
+            <li>Check the sender's actual email address, not just the display name</li>
+            <li>Hover over links before clicking to see the real destination URL</li>
+            <li>Be cautious of urgent or threatening language pressuring you to act quickly</li>
+            <li>When in doubt, report the email to your IT/security team instead of clicking</li>
+        </ul>
+    </div>
+
+    {% if next_result %}
+        <a href="{% url 'simulation_detail' next_result.tracking_token %}" class="btn-cs btn-cs-primary mt-3">Next Simulation &rarr;</a>
+    {% else %}
+        <p class="mt-3" style="color: var(--cs-success); font-weight: 600;">You've reviewed all your simulations!</p>
+    {% endif %}
+    <a href="{% url 'my_simulations' %}" class="btn-cs btn-cs-outline mt-3">Back to My Simulations</a>
+    <a href="{% url 'dashboard' %}" class="btn-cs btn-cs-outline mt-3">Back to Dashboard</a>
+</div>
+{% endblock %}

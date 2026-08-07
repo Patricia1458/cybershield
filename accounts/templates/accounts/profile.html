@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Profile</h1>
+    <p class="subtitle">View your account details and training progress.</p>
+</div>
+
+<div class="grid-2">
+    <div class="cs-card text-center">
+        <div class="avatar avatar-square avatar-xl">
+            {% if user.first_name %}{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}{% else %}{{ user.username|slice:":2"|upper }}{% endif %}
+        </div>
+        <h2 class="profile-name">
+            {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+        </h2>
+        <p class="profile-email">{{ user.profile.encrypted_email }}</p>
+        <span class="badge-cs {% if user.profile.status == 'active' or not user.profile.status %}badge-success{% else %}badge-warning{% endif %}">
+            {% if user.profile.status %}{{ user.profile.get_status_display }}{% else %}Active{% endif %}
+        </span>
+
+        <div class="mt-4" style="text-align: left;">
+            <div class="profile-info-row">
+                <span class="info-label">Organization</span>
+                <span class="info-value">{{ user.profile.organization.name|default:"—" }}</span>
+            </div>
+            <div class="profile-info-row">
+                <span class="info-label">Joined</span>
+                <span class="info-value">{{ user.profile.date_joined|date:"M j, Y" }}</span>
+            </div>
+            <div class="profile-info-row">
+                <span class="info-label">Role</span>
+                <span class="info-value">{{ user.profile.get_role_display }}</span>
+            </div>
+        </div>
+
+        <a href="{% url 'edit_profile' %}" class="btn-cs btn-cs-primary mt-4" style="width: 100%; justify-content: center;">Edit Profile</a>
+    </div>
+
+    <div class="cs-card">
+        <h3 class="mb-3">Training Statistics</h3>
+        <div class="kpi-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+            <div class="kpi-card">
+                <div class="kpi-label">Security Score</div>
+                <div class="kpi-value">{{ security_score }}%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Training Completion</div>
+                <div class="kpi-value">{{ completion_rate }}%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Average Quiz Score</div>
+                <div class="kpi-value">{{ avg_quiz_score }}%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Phishing Detection</div>
+                <div class="kpi-value">{{ detection_rate }}%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cs-card mt-4">
+    <h3 class="mb-3">Earned Badges</h3>
+    <div class="badge-row">
+        {% for badge in badges %}
+        <div class="badge-item {% if badge.earned %}earned{% else %}locked{% endif %}">
+            <div class="badge-icon">{% if badge.earned %}&#10003;{% else %}&#128274;{% endif %}</div>
+            <div class="badge-label">{{ badge.label }}</div>
+            <div class="badge-status">{% if badge.earned %}Earned{% else %}Locked{% endif %}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="cs-card mt-4">
+    <h3 class="mb-3">Preferences</h3>
+    <div class="pref-row">
+        <div>
+            <div class="pref-label">Email notifications</div>
+            <div class="pref-sub">Receive updates about assigned training and campaigns.</div>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+    <div class="pref-row">
+        <div>
+            <div class="pref-label">Weekly progress digest</div>
+            <div class="pref-sub">A short summary of your training activity each week.</div>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+    <p class="text-small mt-2" style="color: var(--cs-text-muted);">These preferences are not yet saved to your account.</p>
+</div>
+{% endblock %}

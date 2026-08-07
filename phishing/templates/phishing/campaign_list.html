@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h1>Phishing Campaigns</h1>
+        <p class="subtitle">Track simulated phishing tests sent to your team.</p>
+    </div>
+    <a href="{% url 'phishing_analytics' %}" class="btn-cs btn-cs-outline">View Analytics</a>
+</div>
+
+{% if campaigns %}
+<div class="grid-3">
+{% for campaign in campaigns %}
+    <div class="training-card">
+        {% if campaign.status == 'active' %}
+            <span class="badge-cs badge-success mb-2">{{ campaign.status|title }}</span>
+        {% elif campaign.status == 'completed' %}
+            <span class="badge-cs badge-neutral mb-2">{{ campaign.status|title }}</span>
+        {% else %}
+            <span class="badge-cs badge-warning mb-2">{{ campaign.status|title }}</span>
+        {% endif %}
+        <h3>{{ campaign.name }}</h3>
+        <a href="{% url 'campaign_detail' campaign.id %}" class="btn-cs btn-cs-primary mt-auto">View Details</a>
+    </div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty-state cs-card">
+    <h3>No phishing campaigns yet</h3>
+    <p>Create one from the Django admin panel to get started.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Edit Profile</h1>
+    <p class="subtitle">Update your name and email address.</p>
+</div>
+
+<div class="cs-card" style="max-width: 480px;">
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        {% endfor %}
+        <div style="display: flex; gap: 0.75rem;">
+            <button type="submit" class="btn-cs btn-cs-primary">Save Changes</button>
+            <a href="{% url 'profile' %}" class="btn-cs btn-cs-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

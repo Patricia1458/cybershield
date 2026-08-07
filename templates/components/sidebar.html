@@ -1,0 +1,58 @@
+{% load static %}
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <a href="{% url 'dashboard_home' %}" class="sidebar-brand-link">
+            <img src="{% static 'img/logo-shield.svg' %}" alt="CyberShield" style="height: 28px; width: 28px;">
+            <h1>CyberShield</h1>
+        </a>
+        <div class="tagline">Think Before You Click.</div>
+    </div>
+    <div class="sidebar-section-label">
+        {% if user.profile.role == 'admin' %}Admin Portal{% else %}Employee Portal{% endif %}
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            Dashboard
+        </a>
+        <a href="{% url 'module_list' %}" class="{% if 'module' in request.resolver_match.url_name or request.resolver_match.url_name == 'take_quiz' %}active{% endif %}">
+            Training
+        </a>
+        {% if user.profile.role == 'admin' %}
+            <a href="{% url 'campaign_list' %}" class="{% if request.resolver_match.url_name == 'campaign_list' or request.resolver_match.url_name == 'campaign_detail' %}active{% endif %}">
+                Phishing Campaigns
+            </a>
+            <a href="{% url 'phishing_analytics' %}" class="{% if request.resolver_match.url_name == 'phishing_analytics' %}active{% endif %}">
+                Analytics
+            </a>
+            <a href="{% url 'employee_list' %}" class="{% if request.resolver_match.url_name == 'employee_list' %}active{% endif %}">
+                Employees
+            </a>
+            <a href="{% url 'invite_employee' %}" class="{% if request.resolver_match.url_name == 'invite_employee' %}active{% endif %}">
+                Invite Employee
+            </a>
+        {% else %}
+            <a href="{% url 'my_simulations' %}" class="{% if request.resolver_match.url_name == 'my_simulations' %}active{% endif %}">
+                Phishing Simulations
+            </a>
+            <a href="{% url 'my_progress' %}" class="{% if request.resolver_match.url_name == 'my_progress' %}active{% endif %}">
+                My Progress
+            </a>
+            <a href="{% url 'my_analytics' %}" class="{% if request.resolver_match.url_name == 'my_analytics' %}active{% endif %}">
+                My Analytics
+            </a>
+            <a href="{% url 'my_certificates' %}" class="{% if request.resolver_match.url_name == 'my_certificates' or request.resolver_match.url_name == 'certificate_detail' %}active{% endif %}">
+                My Certificates
+            </a>
+        {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+        <a href="{% url 'profile' %}" class="sidebar-user">
+            <div class="avatar avatar-sm">{% if user.first_name %}{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}{% else %}{{ user.username|slice:":2"|upper }}{% endif %}</div>
+            <div class="sidebar-user-name">{{ user.first_name|default:user.username }}</div>
+        </a>
+        <form method="post" action="{% url 'logout' %}" class="mt-2">
+            {% csrf_token %}
+            <button type="submit" class="btn-cs btn-cs-sm btn-cs-outline" style="color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.3);width:100%;">Logout</button>
+        </form>
+    </div>
+</aside>

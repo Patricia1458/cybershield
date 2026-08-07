@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static training_extras %}
+
+{% block content %}
+{% category_diagram module.category as diagram_path %}
+<div class="cs-card">
+    <span class="badge-cs badge-info mb-2">{{ module.get_category_display }}</span>
+    <h2>{{ module.title }}</h2>
+    <p class="text-small" style="color: var(--cs-text-muted);">{{ module.description }}</p>
+
+    <div class="mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-1">
+            <span class="text-small" style="font-weight: 600;">Your Progress</span>
+            {% if not progress %}
+                <span class="badge-cs badge-neutral">Not Started &middot; 0%</span>
+            {% elif progress.completed %}
+                <span class="badge-cs badge-success">Completed &middot; {{ progress.score }}%</span>
+            {% else %}
+                <span class="badge-cs badge-warning">In Progress &middot; {{ progress.score }}%</span>
+            {% endif %}
+        </div>
+        <div class="progress-cs">
+            <div class="progress-cs-fill" style="width: {% if progress %}{{ progress.score }}{% else %}0{% endif %}%;"></div>
+        </div>
+    </div>
+
+    <div class="tab-bar" role="tablist">
+        <button type="button" class="tab-btn active" data-tab="content">Content</button>
+        <button type="button" class="tab-btn" data-tab="scenario">Scenario</button>
+        <a href="{% url 'take_quiz' module.id %}" class="tab-btn tab-btn-link">Take Quiz</a>
+    </div>
+
+    <div class="tab-panel" data-panel="content">
+        {% if module.content %}
+            {{ module.content|linebreaks }}
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">No lesson content added yet.</p>
+        {% endif %}
+
+        {% if module.best_practices %}
+            <div class="info-card mt-4">
+                <h4>Best Practices</h4>
+                {{ module.best_practices|linebreaks }}
+            </div>
+        {% endif %}
+    </div>
+    <div class="tab-panel" data-panel="scenario" style="display: none;">
+        {{ module.scenario|linebreaks }}
+
+        {% if diagram_path %}
+            <div class="mt-4">
+                <h4>What This Looks Like</h4>
+                <div class="cs-card diagram-card">
+                    <img src="{% static diagram_path %}" alt="Annotated example of {{ module.get_category_display }} red flags" class="diagram-img">
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="quick-actions mt-3">
+        <a href="{% url 'module_list' %}" class="btn-cs btn-cs-outline">Back to Modules</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var tabButtons = document.querySelectorAll('.tab-btn[data-tab]');
+    var panels = document.querySelectorAll('.tab-panel');
+    tabButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            tabButtons.forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            panels.forEach(function(panel) {
+                panel.style.display = (panel.getAttribute('data-panel') === btn.getAttribute('data-tab')) ? 'block' : 'none';
+            });
+        });
+    });
+})();
+</script>
+{% endblock %}

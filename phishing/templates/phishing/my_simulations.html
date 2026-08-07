@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Phishing Simulations</h1>
+    <p class="subtitle">Simulated phishing emails sent to you as part of security awareness training.</p>
+</div>
+
+{% if results %}
+<div class="grid-3">
+{% for result in results %}
+    <div class="training-card">
+        {% if result.reported_suspicious %}
+            <span class="badge-cs badge-success mb-2">Reported</span>
+        {% elif result.clicked_link %}
+            <span class="badge-cs badge-danger mb-2">Clicked</span>
+        {% else %}
+            <span class="badge-cs badge-neutral mb-2">Not Actioned</span>
+        {% endif %}
+        <h3>{{ result.campaign.name }}</h3>
+        <p class="card-meta">Sent {{ result.email_sent_at|date:"M j, Y" }}</p>
+
+        <a href="{% url 'simulation_detail' result.tracking_token %}" class="btn-cs btn-cs-primary mt-auto">
+            {% if result.campaign.template.channel == 'sms' %}View Message
+            {% elif result.campaign.template.channel == 'voice' %}View Voicemail
+            {% else %}View Email
+            {% endif %}
+        </a>
+    </div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty-state cs-card">
+    <h3>No simulated phishing emails yet</h3>
+    <p>When your organization runs a phishing awareness campaign, it will show up here.</p>
+</div>
+{% endif %}
+{% endblock %}

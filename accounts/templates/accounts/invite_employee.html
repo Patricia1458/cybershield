@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<a href="{% url 'employee_list' %}" class="text-small">&lt; Back to Employees</a>
+
+<div class="page-header mt-2">
+    <h1>Invite Employees</h1>
+    <p class="subtitle">Add a new employee and assign their first training modules.</p>
+</div>
+
+<div class="grid-2">
+    <div class="cs-card">
+        <h3>Send Invitation</h3>
+
+        {% if temp_password %}
+            <p class="text-small" style="color: var(--cs-text-muted);">
+                {{ invited_name }} was added successfully. Since this project doesn't have real email delivery
+                configured, hand these credentials to the employee directly (they were also printed to the
+                console/server log).
+            </p>
+            <table class="cs-table" style="margin-bottom: 1rem;">
+                <tbody>
+                    <tr>
+                        <th style="text-transform: none; font-size: 0.85rem;">Username</th>
+                        <td>{{ invited_username }}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-transform: none; font-size: 0.85rem;">Temporary Password</th>
+                        <td><code>{{ temp_password }}</code></td>
+                    </tr>
+                    {% if assigned_modules %}
+                    <tr>
+                        <th style="text-transform: none; font-size: 0.85rem;">Assigned Modules</th>
+                        <td>{% for m in assigned_modules %}{{ m.title }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            <a href="{% url 'invite_employee' %}" class="btn-cs btn-cs-primary">Invite Another</a>
+        {% else %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label" for="id_employee_name">Employee Name</label>
+                    <input type="text" class="form-control" id="id_employee_name" name="employee_name" value="{{ employee_name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="id_employee_email">Employee Email</label>
+                    <input type="email" class="form-control" id="id_employee_email" name="employee_email" value="{{ employee_email }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Training Modules to Assign</label>
+                    {% if modules %}
+                        <div class="module-checklist">
+                            {% for module in modules %}
+                                <label class="module-check-item">
+                                    <input type="checkbox" name="modules" value="{{ module.id }}" {% if module.id|stringformat:"s" in selected_module_ids %}checked{% endif %}>
+                                    <span>
+                                        <span class="module-title">{{ module.title }}</span><br>
+                                        <span class="module-meta">{{ module.estimated_minutes }} min &middot; {{ module.get_difficulty_display }}</span>
+                                    </span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-small" style="color: var(--cs-text-muted);">No training modules exist yet.</p>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="id_personal_message">Personal Message (optional)</label>
+                    <textarea class="form-control" id="id_personal_message" name="personal_message" rows="3">{{ personal_message }}</textarea>
+                </div>
+
+                <button type="submit" class="btn-cs btn-cs-primary">Send Invitation</button>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="cs-card">
+        <h3>Current Members</h3>
+        <form method="get" class="mb-3">
+            <input type="text" name="member_search" class="form-control" placeholder="Search members" value="{{ member_search }}">
+        </form>
+
+        {% if members %}
+            {% for m in members %}
+                <div class="member-row">
+                    <div class="employee-cell">
+                        <div class="avatar avatar-sm">
+                            {% if m.profile.user.first_name %}{{ m.profile.user.first_name|first|upper }}{{ m.profile.user.last_name|first|upper }}{% else %}{{ m.profile.user.username|slice:":2"|upper }}{% endif %}
+                        </div>
+                        <div>
+                            <div class="employee-name">{% if m.profile.user.first_name %}{{ m.profile.user.first_name }} {{ m.profile.user.last_name }}{% else %}{{ m.profile.user.username }}{% endif %}</div>
+                            <div class="employee-email">{{ m.profile.encrypted_email }}</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        {% if m.profile.status == 'active' %}
+                            <span class="badge-cs badge-success">Active</span>
+                        {% else %}
+                            <span class="badge-cs badge-outline">{{ m.profile.get_status_display }}</span>
+                        {% endif %}
+                        <div class="table-progress">
+                            <div class="progress-cs"><div class="progress-cs-fill" style="width: {{ m.completion_rate }}%;"></div></div>
+                            <span class="progress-cs-value">{{ m.completion_rate }}%</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">No employees yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    <div class="hero-content">
+        <p class="eyebrow">Cybersecurity Awareness Training</p>
+        <h1>Train your team.<br>Test their instincts.<br>Stop real attacks.</h1>
+        <p class="hero-sub">CyberShield helps TechStart SME build a security-first culture through
+        interactive training modules and realistic simulated phishing exercises.</p>
+        <div class="landing-buttons">
+            <a href="{% url 'login' %}" class="btn-cs btn-cs-primary">Login</a>
+            <a href="{% url 'register' %}" class="btn-cs btn-cs-outline" style="color:#fff;border-color:rgba(255,255,255,0.6);">Get Started</a>
+        </div>
+
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-value">{{ module_count }}</div>
+                <div class="hero-stat-label">Training Modules</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">Simulated</div>
+                <div class="hero-stat-label">Phishing Testing</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">Role-Based</div>
+                <div class="hero-stat-label">Security Access</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="feature-strip">
+    <div class="feature-card">
+        <h3>Awareness Training</h3>
+        <p>Bite-sized modules and quizzes that teach employees to recognise real threats.</p>
+    </div>
+    <div class="feature-card">
+        <h3>Simulated Phishing</h3>
+        <p>Realistic phishing tests with automatic click-tracking, run safely and privately.</p>
+    </div>
+    <div class="feature-card">
+        <h3>Clear Reporting</h3>
+        <p>Admins see exactly who clicked, who reported, and where training is needed most.</p>
+    </div>
+</section>
+{% endblock %}

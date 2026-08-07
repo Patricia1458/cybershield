@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<a href="{% url 'my_certificates' %}" class="text-small">&lt; Back to My Certificates</a>
+
+<div class="page-header mt-2">
+    <h1>Certificate of Completion</h1>
+</div>
+
+<div class="certificate-preview">
+    <p class="text-small" style="color: var(--cs-text-muted); text-transform: uppercase; letter-spacing: 0.06em;">
+        CyberShield Security Awareness Training
+    </p>
+    <h2>This certifies that</h2>
+    <div class="recipient">
+        {% if certificate.user.first_name %}{{ certificate.user.first_name }} {{ certificate.user.last_name }}{% else %}{{ certificate.user.username }}{% endif %}
+    </div>
+    <p>has successfully completed the training module</p>
+    <h2>{{ certificate.module.title }}</h2>
+    <p class="text-small mt-3" style="color: var(--cs-text-muted);">
+        Issued {{ certificate.issued_at|date:"F j, Y" }} &middot; Certificate ID: {{ certificate.id }}
+    </p>
+    <a href="{% url 'certificate_pdf' certificate.id %}" class="btn-cs btn-cs-primary mt-3">Download PDF</a>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<a href="{% url 'employee_detail' employee.id %}" class="text-small">&lt; Back to {% if employee.first_name %}{{ employee.first_name }}{% else %}{{ employee.username }}{% endif %}</a>
+
+<div class="page-header mt-2">
+    <h1>Assign Training</h1>
+    <p class="subtitle">Choose additional modules to assign to {% if employee.first_name %}{{ employee.first_name }} {{ employee.last_name }}{% else %}{{ employee.username }}{% endif %}.</p>
+</div>
+
+<div class="cs-card" style="max-width: 640px;">
+    <form method="post">
+        {% csrf_token %}
+        {% if modules %}
+            <div class="module-checklist">
+                {% for module in modules %}
+                    <label class="module-check-item">
+                        <input type="checkbox" name="modules" value="{{ module.id }}"
+                            {% if module.id in already_assigned_ids %}checked disabled{% endif %}>
+                        <span>
+                            <span class="module-title">{{ module.title }}</span><br>
+                            <span class="module-meta">
+                                {{ module.estimated_minutes }} min &middot; {{ module.get_difficulty_display }}
+                                {% if module.id in already_assigned_ids %} &middot; Already assigned{% endif %}
+                            </span>
+                        </span>
+                    </label>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn-cs btn-cs-primary mt-3">Assign Selected Modules</button>
+        {% else %}
+            <p class="text-small" style="color: var(--cs-text-muted);">No training modules exist yet.</p>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

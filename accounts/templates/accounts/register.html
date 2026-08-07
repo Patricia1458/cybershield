@@ -1,0 +1,38 @@
+{% extends 'base_auth.html' %}
+{% block title %}Register — CyberShield{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-brand">
+            <h1>CyberShield</h1>
+            <div class="tagline">Think Before You Click.</div>
+            <p>Build stronger cybersecurity habits through practical training and realistic simulations.</p>
+        </div>
+        <div class="auth-form-panel">
+            <h2>Create Your Account</h2>
+            <p class="auth-sub">Register to get started.</p>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    {% if field.name != 'terms' %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                <div class="mb-3 form-check">
+                    {{ form.terms }}
+                    <label class="form-check-label" for="{{ form.terms.id_for_label }}">{{ form.terms.label }}</label>
+                    {% for error in form.terms.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </div>
+                <button type="submit" class="btn-cs btn-cs-primary w-100">Register</button>
+            </form>
+            <p class="text-center mt-3 text-small">
+                Already have an account? <a href="{% url 'login' %}">Sign In</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
