@@ -11,6 +11,11 @@
         <div class="auth-form-panel">
             <h2>Create Your Account</h2>
             <p class="auth-sub">Register to get started.</p>
+            <div class="alert-cs alert-info">
+                This creates a new organization account, and you'll be its administrator.
+                If you're joining an existing team, ask your admin to invite you instead —
+                you'll get a login directly from them.
+            </div>
             <form method="post">
                 {% csrf_token %}
                 {% for field in form %}

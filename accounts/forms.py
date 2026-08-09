@@ -15,7 +15,12 @@ class ProfileEditForm(forms.ModelForm):
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
-    organization_name = forms.CharField(max_length=150, required=True, label='Organization Name')
+    organization_name = forms.CharField(
+        max_length=150,
+        required=True,
+        label="Your Organization's Name",
+        widget=forms.TextInput(attrs={'placeholder': 'e.g. Acme Corp'}),
+    )
     terms = forms.BooleanField(required=True, label='I agree to the Terms of Service and Privacy Policy')
 
     class Meta:
