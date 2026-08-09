@@ -11,6 +11,21 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# Behind Railway's edge proxy, the app only ever sees plain HTTP internally —
+# this tells Django to trust the proxy's X-Forwarded-Proto header so it knows
+# the original request was actually HTTPS (needed for secure cookies/redirects).
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Django's CSRF check validates the Origin/Referer against this explicit allow
+# list (ALLOWED_HOSTS alone isn't enough) — built from the same hosts, with
+# both schemes so it works locally (http) and in production (https).
+CSRF_TRUSTED_ORIGINS = [
+    origin
+    for host in ALLOWED_HOSTS
+    if host not in ('localhost', '127.0.0.1', '*')
+    for origin in (f'https://{host}', f'http://{host}')
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
