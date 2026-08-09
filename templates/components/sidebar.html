@@ -2,7 +2,7 @@
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
         <a href="{% url 'dashboard_home' %}" class="sidebar-brand-link">
-            <img src="{% static 'img/logo-shield.svg' %}" alt="CyberShield" style="height: 28px; width: 28px;">
+            <img src="{% static 'img/logo-shield.svg' %}" alt="CyberShield" class="sidebar-brand-icon">
             <h1>CyberShield</h1>
         </a>
         <div class="tagline">Think Before You Click.</div>
@@ -52,7 +52,7 @@
         </a>
         <form method="post" action="{% url 'logout' %}" class="mt-2">
             {% csrf_token %}
-            <button type="submit" class="btn-cs btn-cs-sm btn-cs-outline" style="color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.3);width:100%;">Logout</button>
+            <button type="submit" class="btn-cs btn-cs-sm btn-cs-outline sidebar-logout-btn">Logout</button>
         </form>
     </div>
 </aside>

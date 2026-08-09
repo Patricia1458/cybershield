@@ -895,3 +895,8 @@ a:hover { color: var(--cs-primary-light); }
     border-radius: 6px;
 }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Moved out of inline style="" attributes to keep CSP style-src free of 'unsafe-inline' */
+.sidebar-brand-icon { height: 28px; width: 28px; }
+.sidebar-logout-btn { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.3); width: 100%; }
+.hero-cta-outline { color: #fff; border-color: rgba(255,255,255,0.6); }

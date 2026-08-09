@@ -156,14 +156,18 @@ if not DEBUG:
 # Restricts which origins the browser is allowed to load scripts/styles/fonts
 # from, mitigating XSS impact. Kept in sync with the CDN links used in
 # templates/base.html and templates/base_auth.html.
+# 'unsafe-inline' is required on script-src/style-src because many templates
+# (dashboard charts, quiz pages, etc.) use inline <script>/style="" — removing
+# it needs a template-by-template rewrite to nonces, which is out of scope here.
 CSP_POLICY = (
     "default-src 'self'; "
-    "script-src 'self' https://cdn.jsdelivr.net; "
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
     "font-src 'self' https://fonts.gstatic.com; "
     "img-src 'self' data:; "
     "connect-src 'self'; "
     "object-src 'none'; "
     "base-uri 'self'; "
+    "form-action 'self'; "
     "frame-ancestors 'none';"
 )
