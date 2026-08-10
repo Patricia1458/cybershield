@@ -35,7 +35,9 @@ class RegistrationTests(TestCase):
 class LoginTests(TestCase):
     def setUp(self):
         self.org = Organization.objects.create(name='Acme')
-        self.user = User.objects.create_user(username='loginadmin', password='SecurePass123!')
+        self.user = User.objects.create_user(
+            username='loginadmin', email='loginadmin@example.com', password='SecurePass123!'
+        )
         Profile.objects.create(user=self.user, role='admin', organization=self.org)
 
     def test_login_success(self):
@@ -43,6 +45,64 @@ class LoginTests(TestCase):
 
     def test_login_wrong_password_fails(self):
         self.assertFalse(self.client.login(username='loginadmin', password='WrongPassword1!'))
+
+    def test_login_with_email_succeeds(self):
+        # The login field is labeled "Email" but must keep accepting username too
+        # (EmailOrUsernameBackend falls back to ModelBackend for that).
+        self.assertTrue(self.client.login(username='loginadmin@example.com', password='SecurePass123!'))
+
+    def test_login_with_email_is_case_insensitive(self):
+        self.assertTrue(self.client.login(username='LoginAdmin@Example.com', password='SecurePass123!'))
+
+    def test_login_with_unknown_email_fails(self):
+        self.assertFalse(self.client.login(username='nobody@example.com', password='SecurePass123!'))
+
+    def test_login_with_email_but_wrong_password_fails(self):
+        self.assertFalse(self.client.login(username='loginadmin@example.com', password='WrongPassword1!'))
+
+
+class EmailLoginEndToEndTests(TestCase):
+    """Posts to the real login view (not the client.login() shortcut) so the
+    request flows through AxesStandaloneBackend exactly as it does in production."""
+
+    def setUp(self):
+        self.org = Organization.objects.create(name='Acme')
+        self.user = User.objects.create_user(
+            username='emaillogin', email='emaillogin@example.com', password='SecurePass123!'
+        )
+        Profile.objects.create(user=self.user, role='employee', organization=self.org)
+
+    def test_login_via_view_with_email(self):
+        response = self.client.post(reverse('login'), {
+            'username': 'emaillogin@example.com',
+            'password': 'SecurePass123!',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('_auth_user_id', self.client.session)
+
+    def test_login_via_view_with_username_still_works(self):
+        response = self.client.post(reverse('login'), {
+            'username': 'emaillogin',
+            'password': 'SecurePass123!',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('_auth_user_id', self.client.session)
+
+    def test_axes_still_locks_out_after_failed_email_attempts(self):
+        for _ in range(5):
+            self.client.post(reverse('login'), {
+                'username': 'emaillogin@example.com',
+                'password': 'WrongPassword!',
+            })
+        # 6th attempt, even with the correct password, must be blocked by axes —
+        # confirms EmailOrUsernameBackend sitting after AxesStandaloneBackend in
+        # the chain doesn't bypass the lockout.
+        response = self.client.post(reverse('login'), {
+            'username': 'emaillogin@example.com',
+            'password': 'SecurePass123!',
+        })
+        self.assertEqual(response.status_code, 429)
+        self.assertNotIn('_auth_user_id', self.client.session)
 
 
 class IsAdminHelperTests(TestCase):

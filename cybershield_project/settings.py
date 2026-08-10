@@ -57,7 +57,12 @@ MIDDLEWARE = [
 AUTHENTICATION_BACKENDS = [
     # django-axes 8.x renamed the old AxesStandardBackend to AxesStandaloneBackend
     # (a backend meant to be combined with ModelBackend, same pattern as before).
+    # It must stay first so lockouts are enforced before any credential check runs.
     'axes.backends.AxesStandaloneBackend',
+    # Tried before ModelBackend so a typed email resolves to its user; falls
+    # through (returns None) for anything that isn't a known email, letting
+    # ModelBackend's username match handle that case instead.
+    'accounts.backends.EmailOrUsernameBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 

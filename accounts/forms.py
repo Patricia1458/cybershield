@@ -1,6 +1,23 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+
+class CyberShieldLoginForm(AuthenticationForm):
+    """Same 'username' POST field Django/axes expect — only the label, help
+    text and widget change, since EmailOrUsernameBackend now accepts either
+    an email or a username typed into it (see accounts/backends.py)."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = 'Email'
+        self.fields['username'].help_text = 'You can also sign in with your username.'
+        self.fields['username'].widget.attrs.update({
+            'class': 'form-control',
+            'autocomplete': 'email',
+            'placeholder': 'you@company.com',
+        })
+        self.fields['password'].widget.attrs['class'] = 'form-control'
+
 
 class ProfileEditForm(forms.ModelForm):
     class Meta:
