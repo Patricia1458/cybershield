@@ -3,6 +3,19 @@
 {% block content %}
 <div class="cs-card">
     <h2>{{ module.title }} — Quiz</h2>
+
+    {% if module.scenario %}
+        <div class="info-card" id="scenarioPanel">
+            <div class="d-flex align-items-center justify-content-between" style="cursor: pointer;" id="scenarioToggle">
+                <h4 style="margin: 0;">Scenario</h4>
+                <button type="button" class="btn-cs btn-cs-outline btn-cs-sm" id="scenarioToggleBtn" aria-expanded="true" aria-controls="scenarioBody">Hide</button>
+            </div>
+            <div id="scenarioBody">
+                {{ module.scenario|linebreaks }}
+            </div>
+        </div>
+    {% endif %}
+
     <p class="text-small" id="quizProgress" style="color: var(--cs-text-muted);">Question 1 of {{ questions|length }}</p>
 
     <form method="post" id="quizForm">
@@ -48,6 +61,28 @@
 
 {% block extra_js %}
 <script>
+(function() {
+    // Independent of question navigation below — stays as-is (default expanded)
+    // no matter which question is currently showing.
+    var toggleBtn = document.getElementById('scenarioToggleBtn');
+    var toggleHeader = document.getElementById('scenarioToggle');
+    var body = document.getElementById('scenarioBody');
+    if (toggleBtn && body) {
+        var setExpanded = function(expanded) {
+            body.style.display = expanded ? 'block' : 'none';
+            toggleBtn.textContent = expanded ? 'Hide' : 'Show';
+            toggleBtn.setAttribute('aria-expanded', expanded);
+        };
+        var toggle = function() {
+            setExpanded(body.style.display === 'none');
+        };
+        toggleBtn.addEventListener('click', toggle);
+        toggleHeader.addEventListener('click', function(e) {
+            if (e.target !== toggleBtn) toggle();
+        });
+    }
+})();
+
 (function() {
     var questions = document.querySelectorAll('.quiz-question');
     var total = questions.length;
