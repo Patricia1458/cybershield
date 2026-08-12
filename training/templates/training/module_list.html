@@ -15,7 +15,16 @@
 <div class="grid-3">
 {% for module in modules %}
     <div class="training-card">
-        <span class="badge-cs badge-info mb-2">{{ module.get_category_display }}</span>
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="badge-cs badge-info">{{ module.get_category_display }}</span>
+            {% if not module.progress %}
+                <span class="badge-cs badge-neutral">Not Started</span>
+            {% elif module.progress.completed %}
+                <span class="badge-cs badge-success">Completed &middot; {{ module.progress.score }}%</span>
+            {% else %}
+                <span class="badge-cs badge-warning">In Progress</span>
+            {% endif %}
+        </div>
         <h3>{{ module.title }}</h3>
         <p class="card-meta">{{ module.description }}</p>
         <a href="{% url 'module_detail' module.id %}" class="btn-cs btn-cs-primary mt-auto">View Module</a>

@@ -19,7 +19,14 @@ def _can_view_certificate(user, certificate):
 
 @login_required
 def module_list(request):
-    modules = TrainingModule.objects.all()
+    modules = list(TrainingModule.objects.all())
+    progress_by_module_id = {
+        p.module_id: p
+        for p in UserProgress.objects.filter(user=request.user, module__in=modules)
+    }
+    for module in modules:
+        module.progress = progress_by_module_id.get(module.id)
+
     return render(request, 'training/module_list.html', {
         'modules': modules,
         'is_admin': is_admin(request.user),
