@@ -18,11 +18,9 @@
         <div class="d-flex align-items-center justify-content-between mb-2">
             <span class="badge-cs badge-info">{{ module.get_category_display }}</span>
             {% if not module.progress %}
-                <span class="badge-cs badge-neutral">Not Started</span>
-            {% elif module.progress.completed %}
-                <span class="badge-cs badge-success">Completed &middot; {{ module.progress.score }}%</span>
+                <span class="badge-cs badge-neutral">Not Started &middot; 0%</span>
             {% else %}
-                <span class="badge-cs badge-warning">In Progress</span>
+                <span class="badge-cs {{ module.progress.progress_badge_class }}">{{ module.progress.progress_label }}</span>
             {% endif %}
         </div>
         <h3>{{ module.title }}</h3>

@@ -9,14 +9,12 @@
             <span class="text-small" style="font-weight: 600;">Your Progress</span>
             {% if not progress %}
                 <span class="badge-cs badge-neutral">Not Started &middot; 0%</span>
-            {% elif progress.completed %}
-                <span class="badge-cs badge-success">Completed &middot; {{ progress.score }}%</span>
             {% else %}
-                <span class="badge-cs badge-warning">In Progress &middot; {{ progress.score }}%</span>
+                <span class="badge-cs {{ progress.progress_badge_class }}">{{ progress.progress_label }}</span>
             {% endif %}
         </div>
         <div class="progress-cs">
-            <div class="progress-cs-fill" style="width: {% if progress %}{{ progress.score }}{% else %}0{% endif %}%;"></div>
+            <div class="progress-cs-fill" style="width: {% if progress %}{{ progress.progress_percent }}{% else %}0{% endif %}%;"></div>
         </div>
     </div>
 

@@ -25,6 +25,91 @@ def _make_question(module, correct='a'):
     )
 
 
+class UserProgressStagedProgressTests(TestCase):
+    def setUp(self):
+        self.org = Organization.objects.create(name='Acme')
+        self.user = User.objects.create_user(username='progressuser', password='SecurePass123!')
+        Profile.objects.create(user=self.user, role='employee', organization=self.org)
+        self.module = _make_module()
+
+    def test_no_record_defaults_not_started(self):
+        # No UserProgress row at all — templates handle this as 0% / Not Started
+        # themselves (there's no instance to call the method on).
+        self.assertFalse(UserProgress.objects.filter(user=self.user, module=self.module).exists())
+
+    def test_nothing_viewed_is_not_started(self):
+        progress = UserProgress.objects.create(user=self.user, module=self.module)
+        self.assertEqual(progress.progress_percent(), 0)
+        self.assertEqual(progress.progress_label(), 'Not Started · 0%')
+        self.assertEqual(progress.progress_badge_class(), 'badge-neutral')
+
+    def test_content_viewed_is_33_percent(self):
+        progress = UserProgress.objects.create(user=self.user, module=self.module, viewed_content=True)
+        self.assertEqual(progress.progress_percent(), 33)
+        self.assertEqual(progress.progress_label(), 'In Progress · 33%')
+        self.assertEqual(progress.progress_badge_class(), 'badge-warning')
+
+    def test_content_and_scenario_viewed_is_66_percent(self):
+        progress = UserProgress.objects.create(
+            user=self.user, module=self.module, viewed_content=True, viewed_scenario=True,
+        )
+        self.assertEqual(progress.progress_percent(), 66)
+        self.assertEqual(progress.progress_label(), 'In Progress · 66%')
+        self.assertEqual(progress.progress_badge_class(), 'badge-warning')
+
+    def test_completed_with_perfect_score_shows_completed_pill(self):
+        progress = UserProgress.objects.create(
+            user=self.user, module=self.module, completed=True, score=100,
+            viewed_content=True, viewed_scenario=True,
+        )
+        self.assertEqual(progress.progress_percent(), 100)
+        self.assertEqual(progress.progress_label(), 'Completed · 100%')
+        self.assertEqual(progress.progress_badge_class(), 'badge-success')
+
+    def test_completed_with_partial_score_shows_bare_score(self):
+        progress = UserProgress.objects.create(
+            user=self.user, module=self.module, completed=True, score=70,
+            viewed_content=True, viewed_scenario=True,
+        )
+        self.assertEqual(progress.progress_percent(), 70)
+        self.assertEqual(progress.progress_label(), '70%')
+        self.assertEqual(progress.progress_badge_class(), 'badge-warning')
+
+
+@override_settings(AXES_ENABLED=False)
+class MarkViewedTests(TestCase):
+    def setUp(self):
+        self.org = Organization.objects.create(name='Acme')
+        self.user = User.objects.create_user(username='vieweruser', password='SecurePass123!')
+        Profile.objects.create(user=self.user, role='employee', organization=self.org)
+        self.client.login(username='vieweruser', password='SecurePass123!')
+        self.module = _make_module()
+
+    def test_marking_content_viewed_creates_progress_record(self):
+        response = self.client.post(reverse('mark_viewed', args=[self.module.id, 'content']))
+        self.assertEqual(response.status_code, 200)
+        progress = UserProgress.objects.get(user=self.user, module=self.module)
+        self.assertTrue(progress.viewed_content)
+        self.assertFalse(progress.viewed_scenario)
+        self.assertEqual(response.json()['progress_percent'], 33)
+
+    def test_marking_both_tabs_viewed_reaches_66_percent(self):
+        self.client.post(reverse('mark_viewed', args=[self.module.id, 'content']))
+        response = self.client.post(reverse('mark_viewed', args=[self.module.id, 'scenario']))
+        progress = UserProgress.objects.get(user=self.user, module=self.module)
+        self.assertTrue(progress.viewed_content)
+        self.assertTrue(progress.viewed_scenario)
+        self.assertEqual(response.json()['progress_percent'], 66)
+
+    def test_invalid_tab_rejected(self):
+        response = self.client.post(reverse('mark_viewed', args=[self.module.id, 'nonsense']))
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_not_allowed(self):
+        response = self.client.get(reverse('mark_viewed', args=[self.module.id, 'content']))
+        self.assertEqual(response.status_code, 405)
+
+
 class ModuleQuestionLinkTests(TestCase):
     def test_module_questions_related_manager_returns_correct_count(self):
         module = _make_module()

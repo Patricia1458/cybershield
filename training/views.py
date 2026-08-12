@@ -1,6 +1,7 @@
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 from accounts.views import is_admin
 from accounts.utils import record_security_snapshot, log_activity
@@ -41,6 +42,28 @@ def module_detail(request, module_id):
         'module': module,
         'progress': progress,
     })
+
+
+@login_required
+@require_POST
+def mark_viewed(request, module_id, tab):
+    """Records that the employee has viewed the Content or Scenario tab of a
+    module. Content and Scenario are both rendered in the same page load on
+    module_detail.html (just toggled with CSS), so there's no separate
+    server request per tab to hook into — the template's tab-switching JS
+    pings this endpoint instead, once per tab shown."""
+    if tab not in ('content', 'scenario'):
+        return HttpResponseBadRequest('Unknown tab')
+
+    module = get_object_or_404(TrainingModule, id=module_id)
+    progress, _ = UserProgress.objects.get_or_create(user=request.user, module=module)
+
+    field = 'viewed_content' if tab == 'content' else 'viewed_scenario'
+    if not getattr(progress, field):
+        setattr(progress, field, True)
+        progress.save(update_fields=[field])
+
+    return JsonResponse({'progress_percent': progress.progress_percent()})
 
 
 @login_required

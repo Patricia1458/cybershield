@@ -53,9 +53,43 @@ class UserProgress(models.Model):
     score = models.IntegerField(default=0)
     passed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
+    viewed_content = models.BooleanField(default=False)
+    viewed_scenario = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} - {self.module.title}"
+
+    def progress_percent(self):
+        """Staged progress: 0% until the Content tab is viewed, 33% once it has
+        been, 66% once the Scenario tab has been viewed too, then the actual
+        quiz score once the quiz is completed."""
+        if self.completed:
+            return self.score
+        if self.viewed_content and self.viewed_scenario:
+            return 66
+        if self.viewed_content or self.viewed_scenario:
+            return 33
+        return 0
+
+    def progress_label(self):
+        """Full pill text for the current stage, e.g. 'Not Started · 0%',
+        'In Progress · 33%', 'Completed · 100%', or a bare '82%' for a
+        completed-but-imperfect score (see progress_badge_class)."""
+        if self.completed:
+            if self.score == 100:
+                return 'Completed · 100%'
+            return f'{self.score}%'
+        if self.viewed_content or self.viewed_scenario:
+            return f'In Progress · {self.progress_percent()}%'
+        return 'Not Started · 0%'
+
+    def progress_badge_class(self):
+        """The badge-cs modifier class matching progress_label's current stage."""
+        if self.completed:
+            return 'badge-success' if self.score == 100 else 'badge-warning'
+        if self.viewed_content or self.viewed_scenario:
+            return 'badge-warning'
+        return 'badge-neutral'
 
 
 class Certificate(models.Model):

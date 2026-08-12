@@ -9,4 +9,5 @@ urlpatterns = [
     path('certificates/<str:certificate_id>/pdf/', views.certificate_pdf, name='certificate_pdf'),
     path('<int:module_id>/', views.module_detail, name='module_detail'),
     path('<int:module_id>/quiz/', views.take_quiz, name='take_quiz'),
+    path('<int:module_id>/mark-viewed/<str:tab>/', views.mark_viewed, name='mark_viewed'),
 ]

@@ -13,14 +13,12 @@
             <span class="text-small" style="font-weight: 600;">Your Progress</span>
             {% if not progress %}
                 <span class="badge-cs badge-neutral">Not Started &middot; 0%</span>
-            {% elif progress.completed %}
-                <span class="badge-cs badge-success">Completed &middot; {{ progress.score }}%</span>
             {% else %}
-                <span class="badge-cs badge-warning">In Progress &middot; {{ progress.score }}%</span>
+                <span class="badge-cs {{ progress.progress_badge_class }}">{{ progress.progress_label }}</span>
             {% endif %}
         </div>
         <div class="progress-cs">
-            <div class="progress-cs-fill" style="width: {% if progress %}{{ progress.score }}{% else %}0{% endif %}%;"></div>
+            <div class="progress-cs-fill" style="width: {% if progress %}{{ progress.progress_percent }}{% else %}0{% endif %}%;"></div>
         </div>
     </div>
 
@@ -68,6 +66,24 @@
 (function() {
     var tabButtons = document.querySelectorAll('.tab-btn[data-tab]');
     var panels = document.querySelectorAll('.tab-panel');
+
+    // Content and Scenario are both rendered in this one page load (just
+    // toggled via CSS below), so there's no separate request per tab to mark
+    // progress from server-side — ping the endpoint instead, once per tab shown.
+    var markViewedUrls = {
+        content: '{% url "mark_viewed" module.id "content" %}',
+        scenario: '{% url "mark_viewed" module.id "scenario" %}'
+    };
+    function getCookie(name) {
+        var match = document.cookie.match('(^|;\\s*)' + name + '=([^;]*)');
+        return match ? decodeURIComponent(match[2]) : null;
+    }
+    function markViewed(tab) {
+        var url = markViewedUrls[tab];
+        if (!url) return;
+        fetch(url, { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
+    }
+
     tabButtons.forEach(function(btn) {
         btn.addEventListener('click', function() {
             tabButtons.forEach(function(b) { b.classList.remove('active'); });
@@ -75,8 +91,12 @@
             panels.forEach(function(panel) {
                 panel.style.display = (panel.getAttribute('data-panel') === btn.getAttribute('data-tab')) ? 'block' : 'none';
             });
+            markViewed(btn.getAttribute('data-tab'));
         });
     });
+
+    // Content tab is shown by default with no click required.
+    markViewed('content');
 })();
 </script>
 {% endblock %}

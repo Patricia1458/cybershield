@@ -47,7 +47,7 @@
         {% if progress %}
             <table class="cs-table">
                 <thead>
-                    <tr><th>Module</th><th>Completed</th><th>Score</th></tr>
+                    <tr><th>Module</th><th>Completed</th><th>Progress</th></tr>
                 </thead>
                 <tbody>
                 {% for p in progress %}
@@ -60,7 +60,7 @@
                                 <span class="badge-cs badge-neutral">No</span>
                             {% endif %}
                         </td>
-                        <td>{{ p.score }}%</td>
+                        <td>{{ p.progress_percent }}%</td>
                     </tr>
                 {% endfor %}
                 </tbody>
