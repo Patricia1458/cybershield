@@ -83,9 +83,11 @@ def take_quiz(request, module_id):
             'next_module': next_module,
         })
 
+    progress = UserProgress.objects.filter(user=request.user, module=module).first()
     return render(request, 'training/take_quiz.html', {
         'module': module,
         'questions': questions,
+        'progress': progress,
     })
 
 

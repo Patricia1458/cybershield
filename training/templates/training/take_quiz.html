@@ -4,6 +4,22 @@
 <div class="cs-card">
     <h2>{{ module.title }} — Quiz</h2>
 
+    <div class="mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-1">
+            <span class="text-small" style="font-weight: 600;">Your Progress</span>
+            {% if not progress %}
+                <span class="badge-cs badge-neutral">Not Started &middot; 0%</span>
+            {% elif progress.completed %}
+                <span class="badge-cs badge-success">Completed &middot; {{ progress.score }}%</span>
+            {% else %}
+                <span class="badge-cs badge-warning">In Progress &middot; {{ progress.score }}%</span>
+            {% endif %}
+        </div>
+        <div class="progress-cs">
+            <div class="progress-cs-fill" style="width: {% if progress %}{{ progress.score }}{% else %}0{% endif %}%;"></div>
+        </div>
+    </div>
+
     {% if module.scenario %}
         <div class="info-card" id="scenarioPanel">
             <div class="d-flex align-items-center justify-content-between" style="cursor: pointer;" id="scenarioToggle">
@@ -18,7 +34,7 @@
 
     <p class="text-small" id="quizProgress" style="color: var(--cs-text-muted);">Question 1 of {{ questions|length }}</p>
 
-    <form method="post" id="quizForm">
+    <form method="post" id="quizForm" novalidate>
         {% csrf_token %}
         {% for question in questions %}
             <div class="quiz-question mb-4" data-question-index="{{ forloop.counter0 }}" {% if not forloop.first %}style="display: none;"{% endif %}>
@@ -50,6 +66,10 @@
                 </div>
             </div>
         {% endfor %}
+
+        <div class="alert-cs alert-error" id="quizAnswerError" style="display: none;">
+            Please select an answer before continuing.
+        </div>
 
         <div class="quick-actions" style="margin-bottom: 0;">
             <button type="button" id="quizNextBtn" class="btn-cs btn-cs-primary">Next</button>
@@ -90,6 +110,16 @@
     var progressLabel = document.getElementById('quizProgress');
     var nextBtn = document.getElementById('quizNextBtn');
     var submitBtn = document.getElementById('quizSubmitBtn');
+    var quizForm = document.getElementById('quizForm');
+    var errorMsg = document.getElementById('quizAnswerError');
+
+    function hideError() {
+        errorMsg.style.display = 'none';
+    }
+
+    function currentQuestionAnswered() {
+        return !!questions[current].querySelector('input[type="radio"]:checked');
+    }
 
     function showQuestion(index) {
         questions.forEach(function(q, i) {
@@ -99,12 +129,28 @@
         var isLast = index === total - 1;
         nextBtn.style.display = isLast ? 'none' : 'inline-flex';
         submitBtn.style.display = isLast ? 'inline-flex' : 'none';
+        hideError();
     }
 
     nextBtn.addEventListener('click', function() {
+        if (!currentQuestionAnswered()) {
+            errorMsg.style.display = 'block';
+            return;
+        }
         if (current < total - 1) {
             current += 1;
             showQuestion(current);
+        }
+    });
+
+    // Covers the final question's "Submit Quiz" click (type="submit") too, since
+    // that fires this same form submit event — the required attribute alone
+    // isn't reliable here because browsers exclude display:none radio groups
+    // (every other question, at any given time) from constraint validation.
+    quizForm.addEventListener('submit', function(e) {
+        if (!currentQuestionAnswered()) {
+            e.preventDefault();
+            errorMsg.style.display = 'block';
         }
     });
 
