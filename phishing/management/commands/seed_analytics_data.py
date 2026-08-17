@@ -1,4 +1,6 @@
+import os
 import random
+import secrets
 from datetime import timedelta
 
 from django.contrib.auth.models import User
@@ -10,8 +12,6 @@ from accounts.utils import compute_security_stats
 from dashboard.models import SecurityScoreSnapshot
 from training.models import TrainingModule, UserProgress
 from phishing.models import EmailTemplate, PhishingCampaign, PhishingResult
-
-PASSWORD = 'testpass123'
 
 EMPLOYEES = [
     ('jane_employee', 'Jane', 'Smith'),
@@ -34,13 +34,25 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         random.seed()  # fresh variety each run, but each (employee, campaign) pair is independently rolled
 
-        users = self._create_employees()
+        users, new_passwords = self._create_employees()
         template = self._get_or_create_template()
         created_by = self._pick_created_by(users)
         campaigns = self._create_campaigns(template, created_by)
         results_created = self._create_results(campaigns, users)
         progress_created = self._create_progress(users)
         snapshots_created = self._create_snapshots(users)
+
+        if new_passwords:
+            credentials_block = (
+                "\nNew accounts created this run — note these passwords now, "
+                "they are never stored in plaintext or shown again:\n"
+                + "\n".join(f"  {username}: {password}" for username, password in new_passwords.items())
+            )
+        else:
+            credentials_block = (
+                "\nNo new accounts created — all employee usernames already existed, "
+                "so their existing passwords were left untouched."
+            )
 
         self.stdout.write(self.style.SUCCESS(
             "\nSeed complete:\n"
@@ -49,12 +61,20 @@ class Command(BaseCommand):
             f"  Phishing results (re)created: {results_created}\n"
             f"  Training progress records (re)created: {progress_created}\n"
             f"  Security score snapshots (re)created: {snapshots_created}\n"
-            f"\nLogin as any employee with password: {PASSWORD}\n"
-            f"  Usernames: {', '.join(u.username for u in users)}"
+            f"{credentials_block}\n"
+            f"\n  Usernames: {', '.join(u.username for u in users)}"
         ))
 
     def _create_employees(self):
+        """Creates any missing demo employees with a fresh password each — never a
+        single shared hardcoded one. Set SEED_EMPLOYEE_PASSWORD to use the same
+        password for every account created this run (handy for a demo/CI
+        environment); otherwise each gets its own random password, printed once
+        in the summary. Existing accounts are left alone — re-running this command
+        never resets a password that's already been rotated."""
+        fixed_password = os.environ.get('SEED_EMPLOYEE_PASSWORD')
         users = []
+        new_passwords = {}
         for username, first_name, last_name in EMPLOYEES:
             user, created = User.objects.get_or_create(
                 username=username,
@@ -65,15 +85,17 @@ class Command(BaseCommand):
                 },
             )
             if created:
-                user.set_password(PASSWORD)
+                password = fixed_password or secrets.token_urlsafe(12)
+                user.set_password(password)
                 user.save()
+                new_passwords[username] = password
                 self.stdout.write(f'  Created user: {username}')
             else:
                 self.stdout.write(f'  User already exists, reusing: {username}')
 
             Profile.objects.get_or_create(user=user, defaults={'role': 'employee'})
             users.append(user)
-        return users
+        return users, new_passwords
 
     def _get_or_create_template(self):
         template = EmailTemplate.objects.first()

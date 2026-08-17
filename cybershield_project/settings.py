@@ -5,7 +5,10 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-^l#w3$kjmyl3*=@z6lhdf-(8epll(^@c*f(*7-!ri4zub!x)2m')
+# The fallback below is an obvious, unusable placeholder — never a real key —
+# for pure local dev only. Every real deployment (including production) must
+# set DJANGO_SECRET_KEY itself; nothing here is ever meant to be used as-is.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-CHANGE-ME-set-DJANGO_SECRET_KEY-for-local-dev')
 
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
